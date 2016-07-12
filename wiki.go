@@ -18,7 +18,7 @@ func NewWiki(location string, authMethod AuthMethod) (*Wiki, error) {
 	if err != nil {
 		return nil, err
 	}
-	u.Path = "/wiki/rest/api"
+	u.Path = "/rest/api"
 
 	wiki := new(Wiki)
 	wiki.endPoint = u
@@ -90,5 +90,6 @@ func (w *Wiki) sendRequest(req *http.Request) ([]byte, error) {
 		return nil, fmt.Errorf("Internal server error: %s", resp.Status)
 	}
 
-	return nil, fmt.Errorf("Unknown response status %s", resp.Status)
+	res, _:= ioutil.ReadAll(resp.Body)
+	return nil, fmt.Errorf("Unknown response status %s body %s", resp.Status, res)
 }
