@@ -14,7 +14,7 @@ type ContentAncestor struct {
 type Content struct {
 	ID     string `json:"id,omitempty"`
 	Type   string `json:"type"`
-	Status string `json:"status"`
+	Status string `json:"status,omitempty"`
 	Title  string `json:"title"`
 	Body   struct {
 		Storage struct {
@@ -25,6 +25,9 @@ type Content struct {
 	Version struct {
 		Number int `json:"number"`
 	} `json:"version"`
+	Space struct {
+		Key string `json:"key"`
+	} `json:"space,omitempty"`
 	Ancestors []ContentAncestor `json:"ancestors,omitempty"`
 }
 
