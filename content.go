@@ -8,11 +8,11 @@ import (
 )
 
 type ContentAncestor struct {
-	Id string `json:"id"`
+	ID string `json:"id"`
 }
 
 type Content struct {
-	Id     string `json:"id"`
+	ID     string `json:"id,omitempty"`
 	Type   string `json:"type"`
 	Status string `json:"status"`
 	Title  string `json:"title"`
@@ -25,7 +25,7 @@ type Content struct {
 	Version struct {
 		Number int `json:"number"`
 	} `json:"version"`
-	Ancestors []ContentAncestor `json:"ancestors"`
+	Ancestors []ContentAncestor `json:"ancestors,omitempty"`
 }
 
 type ChildrenResults struct {
@@ -101,7 +101,7 @@ func (w *Wiki) internalCreateOrUpdateContent(content *Content, method string) (*
 		return nil, err
 	}
 
-	contentEndPoint, err := w.contentEndpoint(content.Id)
+	contentEndPoint, err := w.contentEndpoint(content.ID)
 	req, err := http.NewRequest(method, contentEndPoint.String(), strings.NewReader(string(jsonbody)))
 	req.Header.Add("Content-Type", "application/json")
 
