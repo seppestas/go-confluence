@@ -7,6 +7,10 @@ import (
 	"strings"
 )
 
+type ContentAncestor struct {
+	Id string `json:"id"`
+}
+
 type Content struct {
 	Id     string `json:"id"`
 	Type   string `json:"type"`
@@ -21,6 +25,7 @@ type Content struct {
 	Version struct {
 		Number int `json:"number"`
 	} `json:"version"`
+	Ancestors []ContentAncestor `json:"ancestors"`
 }
 
 type ChildrenResults struct {
@@ -83,13 +88,21 @@ func (w *Wiki) GetContent(contentID string, expand []string) (*Content, error) {
 }
 
 func (w *Wiki) UpdateContent(content *Content) (*Content, error) {
+	return w.internalCreateOrUpdateContent(content, "PUT")
+}
+
+func (w *Wiki) CreateContent(content *Content) (*Content, error) {
+	return w.internalCreateOrUpdateContent(content, "POST")
+}
+
+func (w *Wiki) internalCreateOrUpdateContent(content *Content, method string) (*Content, error) {
 	jsonbody, err := json.Marshal(content)
 	if err != nil {
 		return nil, err
 	}
 
 	contentEndPoint, err := w.contentEndpoint(content.Id)
-	req, err := http.NewRequest("PUT", contentEndPoint.String(), strings.NewReader(string(jsonbody)))
+	req, err := http.NewRequest(method, contentEndPoint.String(), strings.NewReader(string(jsonbody)))
 	req.Header.Add("Content-Type", "application/json")
 
 	res, err := w.sendRequest(req)
