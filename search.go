@@ -23,11 +23,15 @@ type ContentResult struct {
 	FriendlyLastModified string `json:"friendlyLastModified"`
 }
 
-type Results struct {
+type GenericResults struct {
+	Start int `json:"size"`
+	Limit int `json:"limit"`
+	Size  int `json:"size"`
+}
+
+type SearchResults struct {
+	GenericResults
 	Results        []ContentResult `json:"results"`
-	Start          int             `json:"size"`
-	Limit          int             `json:"limit"`
-	Size           int             `json:"size"`
 	TotalSize      int             `json:"totalSize"`
 	CqlQuery       string          `json:"cqlQuery"`
 	SearchDuration int             `json:"SearchDuration"`
@@ -38,7 +42,7 @@ func (w *Wiki) searchEndpoint() (*url.URL, error) {
 	return url.ParseRequestURI(w.endPoint.String() + "/search")
 }
 
-func (w *Wiki) Search(cql, cqlContext string, expand []string, limit int) (*Results, error) {
+func (w *Wiki) Search(cql, cqlContext string, expand []string, limit int) (*SearchResults, error) {
 	searchEndPoint, err := w.searchEndpoint()
 	if err != nil {
 		return nil, err
@@ -59,7 +63,7 @@ func (w *Wiki) Search(cql, cqlContext string, expand []string, limit int) (*Resu
 		return nil, err
 	}
 
-	var results Results
+	var results SearchResults
 	err = json.Unmarshal(res, &results)
 	if err != nil {
 		return nil, err

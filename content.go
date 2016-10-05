@@ -23,8 +23,17 @@ type Content struct {
 	} `json:"version"`
 }
 
+type ChildrenResults struct {
+	GenericResults
+	Results []Content `json:"results"`
+}
+
 func (w *Wiki) contentEndpoint(contentID string) (*url.URL, error) {
 	return url.ParseRequestURI(w.endPoint.String() + "/content/" + contentID)
+}
+
+func (w *Wiki) contentChildrenPagesEndpoint(contentID string) (*url.URL, error) {
+	return url.ParseRequestURI(w.endPoint.String() + "/content/" + contentID + "/child/page")
 }
 
 func (w *Wiki) DeleteContent(contentID string) error {
@@ -95,4 +104,32 @@ func (w *Wiki) UpdateContent(content *Content) (*Content, error) {
 	}
 
 	return &newContent, nil
+}
+
+func (w *Wiki) GetContentChildrenPages(contentID string, expand []string) (*ChildrenResults, error) {
+	contentEndPoint, err := w.contentChildrenPagesEndpoint(contentID)
+	if err != nil {
+		return nil, err
+	}
+	data := url.Values{}
+	data.Set("expand", strings.Join(expand, ","))
+	contentEndPoint.RawQuery = data.Encode()
+
+	req, err := http.NewRequest("GET", contentEndPoint.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	res, err := w.sendRequest(req)
+	if err != nil {
+		return nil, err
+	}
+
+	var content ChildrenResults
+	err = json.Unmarshal(res, &content)
+	if err != nil {
+		return nil, err
+	}
+
+	return &content, nil
 }
