@@ -1,6 +1,7 @@
 package confluence
 
 import (
+	"bytes"
 	"encoding/json"
 	"net/http"
 	"net/url"
@@ -90,36 +91,36 @@ func (w *Wiki) GetContent(contentID string, expand []string) (*Content, error) {
 	return &content, nil
 }
 
-func (w *Wiki) UpdateContent(content *Content) (*Content, error) {
+func (w *Wiki) UpdateContent(content *Content) (*Content, []byte, error) {
 	return w.internalCreateOrUpdateContent(content, "PUT")
 }
 
-func (w *Wiki) CreateContent(content *Content) (*Content, error) {
+func (w *Wiki) CreateContent(content *Content) (*Content, []byte, error) {
 	return w.internalCreateOrUpdateContent(content, "POST")
 }
 
-func (w *Wiki) internalCreateOrUpdateContent(content *Content, method string) (*Content, error) {
-	jsonbody, err := json.Marshal(content)
+func (w *Wiki) internalCreateOrUpdateContent(content *Content, method string) (*Content, []byte, error) {
+	jsonBody, err := json.Marshal(content)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	contentEndPoint, err := w.contentEndpoint(content.ID)
-	req, err := http.NewRequest(method, contentEndPoint.String(), strings.NewReader(string(jsonbody)))
+	req, err := http.NewRequest(method, contentEndPoint.String(), bytes.NewReader(jsonBody))
 	req.Header.Add("Content-Type", "application/json")
 
 	res, err := w.sendRequest(req)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	var newContent Content
 	err = json.Unmarshal(res, &newContent)
 	if err != nil {
-		return nil, err
+		return nil, res, err
 	}
 
-	return &newContent, nil
+	return &newContent, res, nil
 }
 
 func (w *Wiki) GetContentChildrenPages(contentID string, expand []string) (*ChildrenResults, error) {
