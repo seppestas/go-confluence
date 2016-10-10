@@ -37,8 +37,12 @@ type ChildrenResults struct {
 	Results []Content `json:"results"`
 }
 
-func (w *Wiki) contentEndpoint(contentID string) (*url.URL, error) {
+func (w *Wiki) existingContentEndpoint(contentID string) (*url.URL, error) {
 	return url.ParseRequestURI(w.endPoint.String() + "/content/" + contentID)
+}
+
+func (w *Wiki) newContentEndpoint() (*url.URL, error) {
+	return url.ParseRequestURI(w.endPoint.String() + "/content")
 }
 
 func (w *Wiki) contentChildrenPagesEndpoint(contentID string) (*url.URL, error) {
@@ -46,7 +50,7 @@ func (w *Wiki) contentChildrenPagesEndpoint(contentID string) (*url.URL, error) 
 }
 
 func (w *Wiki) DeleteContent(contentID string) error {
-	contentEndPoint, err := w.contentEndpoint(contentID)
+	contentEndPoint, err := w.existingContentEndpoint(contentID)
 	if err != nil {
 		return err
 	}
@@ -64,7 +68,7 @@ func (w *Wiki) DeleteContent(contentID string) error {
 }
 
 func (w *Wiki) GetContent(contentID string, expand []string) (*Content, error) {
-	contentEndPoint, err := w.contentEndpoint(contentID)
+	contentEndPoint, err := w.existingContentEndpoint(contentID)
 	if err != nil {
 		return nil, err
 	}
@@ -92,20 +96,27 @@ func (w *Wiki) GetContent(contentID string, expand []string) (*Content, error) {
 }
 
 func (w *Wiki) UpdateContent(content *Content) (*Content, []byte, error) {
-	return w.internalCreateOrUpdateContent(content, "PUT")
+	contentEndPoint, err := w.existingContentEndpoint(content.ID)
+	if err != nil {
+		return nil, nil, err
+	}
+	return w.internalCreateOrUpdateContent(content, contentEndPoint, "PUT")
 }
 
 func (w *Wiki) CreateContent(content *Content) (*Content, []byte, error) {
-	return w.internalCreateOrUpdateContent(content, "POST")
+	contentEndPoint, err := w.newContentEndpoint()
+	if err != nil {
+		return nil, nil, err
+	}
+	return w.internalCreateOrUpdateContent(content, contentEndPoint, "POST")
 }
 
-func (w *Wiki) internalCreateOrUpdateContent(content *Content, method string) (*Content, []byte, error) {
+func (w *Wiki) internalCreateOrUpdateContent(content *Content, contentEndPoint *url.URL, method string) (*Content, []byte, error) {
 	jsonBody, err := json.Marshal(content)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	contentEndPoint, err := w.contentEndpoint(content.ID)
 	req, err := http.NewRequest(method, contentEndPoint.String(), bytes.NewReader(jsonBody))
 	req.Header.Add("Content-Type", "application/json")
 
