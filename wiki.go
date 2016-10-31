@@ -98,3 +98,7 @@ func (w *Wiki) sendRequest(req *http.Request) ([]byte, error) {
 
 	return nil, fmt.Errorf("Unknown response status %s", resp.Status)
 }
+
+func (w *Wiki) SetClient(c *http.Client) {
+	w.client = c
+}
