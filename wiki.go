@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"strings"
 )
 
 type Wiki struct {
@@ -18,7 +19,12 @@ func NewWiki(location string, authMethod AuthMethod) (*Wiki, error) {
 	if err != nil {
 		return nil, err
 	}
-	u.Path = "/wiki/rest/api"
+
+	if !strings.HasSuffix(u.Path, "/") {
+		u.Path += "/"
+	}
+
+	u.Path += "rest/api"
 
 	wiki := new(Wiki)
 	wiki.endPoint = u
