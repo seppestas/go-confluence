@@ -6,16 +6,6 @@ import (
 	"net/url"
 )
 
-// type Blogs struct {
-// 	Results []interface{} `json:"results"`
-// 	Start   int           `json:"start"`
-// 	Limit   int           `json:"limit"`
-// 	Size    int           `json:"size"`
-// 	Links   struct {
-// 		Self string `json:"self"`
-// 	} `json:"_links"`
-// }
-
 type Contents struct {
 	Page struct {
 		Results []struct {
@@ -25,7 +15,6 @@ type Contents struct {
 			Title      string `json:"title"`
 			Extensions struct {
 				Position interface{} `json:"position"`
-				// Position int `json:"position,string"`
 			} `json:"extensions"`
 			Links struct {
 				Webui  string `json:"webui"`
@@ -68,10 +57,6 @@ type Contents struct {
 		Context string `json:"context"`
 	} `json:"_links"`
 }
-
-// type SpaceContents struct {
-// 	Page []Pages `json:"page"`
-// }
 
 type Space struct {
 	ID    int    `json:"id"`
@@ -116,7 +101,6 @@ func (w *Wiki) GetSpaces() ([]Space, error) {
 		return nil, err
 	}
 	data := url.Values{}
-	// data.Set("expand", strings.Join(expand, ","))
 	spaceEndPoint.RawQuery = data.Encode()
 
 	req, err := http.NewRequest("GET", spaceEndPoint.String(), nil)
@@ -157,7 +141,6 @@ func (w *Wiki) GetSpaceContent(space string) (*Contents, error) {
 		return nil, err
 	}
 
-	// fmt.Println(string(res))
 	var spacecontents = new(Contents)
 	err = json.Unmarshal(res, &spacecontents)
 	if err != nil {
