@@ -13,5 +13,6 @@ Currently implemented
 	- `DeleteContent`
 	- `GetContent`
 	- `UpdateContent`
+- Get all spaces and space contents (depends on access)
 
 This is everything I needed for my project. I might add some more functionality when I find the time. Feel free to send pull requests.
