@@ -19,7 +19,8 @@ type Content struct {
 		} `json:"storage"`
 	} `json:"body"`
 	Version struct {
-		Number int `json:"number"`
+		Number    int  `json:"number"`
+		MinorEdit bool `json:"minorEdit"`
 	} `json:"version"`
 }
 
