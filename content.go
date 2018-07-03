@@ -96,3 +96,47 @@ func (w *Wiki) UpdateContent(content *Content) (*Content, error) {
 
 	return &newContent, nil
 }
+
+func (w *Wiki) GetPageIDByTitle(title, space string) (string, error) {
+	type GetPageID struct {
+		Results []struct {
+			ID    string `json:"id,omitempty"`
+			Title string `json:"title,omitempty"`
+		} `json:"results,omitempty"`
+	}
+	contentEndPoint, err := w.contentEndpoint("")
+	if err != nil {
+		log.Println(err)
+	}
+	data := url.Values{}
+	data.Set("expand", "history")
+	data.Set("title", title)
+	data.Set("spacekey", "space")
+	contentEndPoint.RawQuery = data.Encode()
+
+	req, err := http.NewRequest("GET", contentEndPoint.String(), nil)
+	if err != nil {
+		return "", err
+	}
+
+	res, err := w.sendRequest(req)
+	if err != nil {
+		return "", err
+	}
+
+	gpid := GetPageID{}
+	err = json.Unmarshal(res, &gpid)
+	if err != nil {
+		return "", err
+	}
+	var pageID, pageTitle string
+	if len(gpid.Results) == 1 {
+		for _, v := range gpid.Results {
+			pageID = v.ID
+			pageTitle = v.Title
+		}
+	}
+	// In case we need to return the title at some point
+	_ = pageTitle
+	return pageID, nil
+}
