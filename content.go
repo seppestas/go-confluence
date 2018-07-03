@@ -106,7 +106,7 @@ func (w *Wiki) GetPageIDByTitle(title, space string) (string, error) {
 	}
 	contentEndPoint, err := w.contentEndpoint("")
 	if err != nil {
-		log.Println(err)
+		return "", err
 	}
 	data := url.Values{}
 	data.Set("expand", "history")
