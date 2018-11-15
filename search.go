@@ -23,14 +23,8 @@ type ContentResult struct {
 	FriendlyLastModified string `json:"friendlyLastModified"`
 }
 
-type GenericResults struct {
-	Start int `json:"size"`
-	Limit int `json:"limit"`
-	Size  int `json:"size"`
-}
-
 type SearchResults struct {
-	GenericResults
+	ResultPagination
 	Results        []ContentResult `json:"results"`
 	TotalSize      int             `json:"totalSize"`
 	CqlQuery       string          `json:"cqlQuery"`
