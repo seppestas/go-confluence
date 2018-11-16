@@ -78,23 +78,25 @@ func (w *Wiki) sendRequest(req *http.Request) ([]byte, error) {
 		return nil, err
 	}
 
-	switch resp.StatusCode {
-	case http.StatusOK, http.StatusCreated, http.StatusPartialContent:
-		res, err := ioutil.ReadAll(resp.Body)
-		resp.Body.Close()
-		if err != nil {
-			return nil, err
-		}
-		return res, nil
-	case http.StatusNoContent, http.StatusResetContent:
-		return nil, nil
-	case http.StatusUnauthorized:
-		return nil, fmt.Errorf("Authentication failed.")
-	case http.StatusServiceUnavailable:
-		return nil, fmt.Errorf("Service is not available (%s).", resp.Status)
-	case http.StatusInternalServerError:
-		return nil, fmt.Errorf("Internal server error: %s", resp.Status)
+	// always read body to give more information about cause of failure
+	res, err2 := ioutil.ReadAll(resp.Body)
+	resp.Body.Close()
+	if err2 != nil {
+		return nil, err2
 	}
 
-	return nil, fmt.Errorf("Unknown response status %s", resp.Status)
+	switch resp.StatusCode {
+	case http.StatusOK, http.StatusCreated, http.StatusPartialContent:
+		return res, nil
+	case http.StatusNoContent, http.StatusResetContent:
+		return res, nil
+	case http.StatusUnauthorized:
+		return res, fmt.Errorf("Authentication failed.")
+	case http.StatusServiceUnavailable:
+		return res, fmt.Errorf("Service is not available (%s).", resp.Status)
+	case http.StatusInternalServerError:
+		return res, fmt.Errorf("Internal server error: %s", resp.Status)
+	}
+
+	return res, fmt.Errorf("Unknown response status %s", resp.Status)
 }
